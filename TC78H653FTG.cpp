@@ -75,9 +75,20 @@ void TC78H653FTG::tick()
     stepper_pin2_state = stepper_pin4_state ? stepper_pin2_state : !stepper_pin2_state;
 
     uint16_t counter_cycle = counter & (micro_step_count - 1);
-    float stepper_pin1_pwm = (counter >> bit_shift_size) & 1 ? get_step_pattern(1 + counter_cycle) : get_step_pattern(micro_step_count - 1 - counter_cycle);
-    float stepper_pin3_pwm = (counter >> bit_shift_size) & 1 ? get_step_pattern(micro_step_count - 1 - counter_cycle) : get_step_pattern(1 + counter_cycle);
-
+    // float stepper_pin1_pwm = (counter >> bit_shift_size) & 1 ? get_step_pattern(1 + counter_cycle) : get_step_pattern(micro_step_count - 1 - counter_cycle);
+    // float stepper_pin3_pwm = (counter >> bit_shift_size) & 1 ? get_step_pattern(micro_step_count - 1 - counter_cycle) : get_step_pattern(1 + counter_cycle);
+    float stepper_pin1_pwm;
+    float stepper_pin3_pwm;
+    if(direction == STEPPER_FORWARD)
+    {
+        stepper_pin1_pwm = (counter >> bit_shift_size) & 1 ? get_step_pattern(1 + counter_cycle) : get_step_pattern(micro_step_count - 1 - counter_cycle);
+        stepper_pin3_pwm = (counter >> bit_shift_size) & 1 ? get_step_pattern(micro_step_count - 1 - counter_cycle) : get_step_pattern(1 + counter_cycle);
+    }
+    else
+    {
+        stepper_pin1_pwm = (counter >> bit_shift_size) & 1 ? get_step_pattern(counter_cycle) : get_step_pattern(micro_step_count - counter_cycle);
+        stepper_pin3_pwm = (counter >> bit_shift_size) & 1 ? get_step_pattern(micro_step_count - counter_cycle) : get_step_pattern(counter_cycle);
+    }
     stepper_pin1_pwm *= 255;
     stepper_pin3_pwm *= 255;
 
@@ -85,7 +96,6 @@ void TC78H653FTG::tick()
     analogWrite(_pin3_pwm, (int)stepper_pin3_pwm);    
     digitalWrite(_pin2, stepper_pin2_state);
     digitalWrite(_pin4, stepper_pin4_state);
-
 
     // char serialBuf[32];
     // snprintf(serialBuf, 32, "%d %d %d %d %d %d %d", counter, bit_shift_size, counter_cycle, (int)stepper_pin1_pwm, stepper_pin2_state, (int)stepper_pin3_pwm, stepper_pin4_state);

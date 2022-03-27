@@ -15,6 +15,9 @@
 
 bool led_state = false;
 
+uint32_t direction_timer = 0;
+#define DIRECTION_CHANGE_PERIOD_MS 2000
+
 TC78H653FTG stepper(STEPPER_PWM_PIN1, STEPPER_PIN2, STEPPER_PWM_PIN3, STEPPER_PIN4, MICROSTEP64);
 
 void setup()
@@ -26,7 +29,7 @@ void setup()
     stepper.init();
     Serial.println("TC78H653FTG driver sample");
     pinMode(LED_BUILTIN, OUTPUT);
-    stepper.direction = STEPPER_FORWARD;
+    stepper.direction = STEPPER_REVERSE;
 }
 
 
@@ -39,6 +42,19 @@ void loop()
     
     // You need call tick() to move the stepper forward
     stepper.tick();
+
+    if(millis() - direction_timer > DIRECTION_CHANGE_PERIOD_MS)
+    {
+        direction_timer = millis();
+        if(stepper.direction == STEPPER_FORWARD)
+        {
+            stepper.direction = STEPPER_REVERSE;
+        }
+        else
+        {
+            stepper.direction = STEPPER_FORWARD;
+        }
+    }
     
     delay(STEPPER_TIMER_MS);
 }
